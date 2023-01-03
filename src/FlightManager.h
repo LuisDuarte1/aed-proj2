@@ -14,7 +14,7 @@ struct AirportNode;
 struct Flight{
     std::shared_ptr<AirportNode> destination_node;
     
-    std::shared_ptr<Airline> flights;
+    std::vector<std::shared_ptr<Airline>> flights;
 
 };
 
@@ -26,6 +26,9 @@ struct AirportNode{
     std::list<Flight> flights;
 
     bool visited;
+    
+    std::shared_ptr<AirportNode> prev;
+
 
     bool operator==(const AirportNode& node) const;
 };
