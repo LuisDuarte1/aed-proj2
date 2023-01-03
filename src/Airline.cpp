@@ -20,16 +20,11 @@ std::string Airline::getName() const { return name; }
 std::string Airline::getCountry() const { return country; }
 
 bool Airline::operator==(const Airline& other){
-    return code==code;
+    return code==other.code;
 }
 
 
 std::size_t HashAirline::operator() (const std::shared_ptr<Airline>& airline) const noexcept{
-    std::string code = airline->getCode();
-    std::size_t acc = 0;
-    for(const char& i : code){
-        acc = 67 * acc + i;
-    }
-    return acc;
+    return std::hash<std::string>{}(airline->getCode());
 }
 

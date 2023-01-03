@@ -6,13 +6,9 @@ FlightManager* FlightManager::instance = nullptr;
 
 
 std::size_t FlightManager::AirportHash::operator()(const std::shared_ptr<AirportNode>& airportNode) const noexcept{
-    std::string code = airportNode->airport.getCode();
-    std::size_t acc = 0;
-    for(const char& i : code){
-        acc = 107 * acc + i;
-    }
-    return acc;
+    return std::hash<std::string>{}(airportNode->airport.getCode());
 }
+
 
 bool FlightManager::AirportEquals::operator()(const std::shared_ptr<AirportNode>& airportNode1, const std::shared_ptr<AirportNode>& airportNode2) const noexcept{
     return (*airportNode1) == (*airportNode2);
@@ -83,7 +79,12 @@ void FlightManager::loadFiles(){
         std::getline(line, country, ',');
         country = trim_string(country);
 
-        airlines.insert(std::make_shared<Airline>(code,callsign,name,country));
+        auto airline = std::make_shared<Airline>(code,callsign,name,country);
+        
+        auto it = airlines.insert(airline);
+        if(!it.second){
+            std::cout << "Couldn't insert element " << code << " because of: " << (*it.first)->getCode() << "\n";
+        }
     }
     
     std::getline(file_airports, buffer);
@@ -125,8 +126,10 @@ void FlightManager::loadFiles(){
 
 
 void FlightManager::resetVisitedAirports(){
+    static const std::shared_ptr<AirportNode> null =std::shared_ptr<AirportNode>(nullptr); 
     for(auto it = airports.begin(); it != airports.end(); it++){
         (*it)->visited = false;
+        (*it)->prev = null;
     }
 }
 
@@ -136,7 +139,18 @@ bool FlightManager::addFlight(std::string src_code, std::string dst_code, std::s
     std::shared_ptr<AirportNode> dst = getAirportNode(dst_code);
     if(dst.get() == nullptr) return false;
 
-    src->flights.push_back({dst, {airline}});
+
+    bool found = false;
+    
+    for(auto it = src->flights.begin(); it != src->flights.end(); it++){
+        if((*(*it).destination_node) == *dst){
+            found = true;
+            (*it).flights.push_back(airline);
+            break;
+        }
+    }
+
+    if(!found) src->flights.push_back({dst, {airline}});
     return true;
 }
 
@@ -147,6 +161,5 @@ std::shared_ptr<AirportNode> FlightManager::getAirportNode(std::string code){
 
 
 std::shared_ptr<Airline> FlightManager::getAirline(std::string code){
-    std::shared_ptr<Airline> airline = std::make_shared<Airline>(code);
-    return *airlines.find(airline);
+    return *airlines.find(std::make_shared<Airline>(Airline(code)));
 }
