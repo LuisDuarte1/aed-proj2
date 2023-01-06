@@ -1,0 +1,7 @@
+# ninja log v5
+1	814	6941258532999537	CMakeFiles/proj1_aed.dir/src/Airline.obj	6c191f9deeb11bd0
+12	848	6941258533337192	CMakeFiles/proj1_aed.dir/src/Airport.obj	9135474d257e4490
+35	929	6941258534140504	CMakeFiles/proj1_aed.dir/src/main.obj	a0158670e1b3ab08
+22	1317	6941258538016074	CMakeFiles/proj1_aed.dir/src/FlightManager.obj	b60f08931a45f882
+1317	1525	6941258540051907	proj1_aed.exe	5d3d4cda2436a827
+6	1089	6943938731231890	CMakeFiles/proj1_aed.dir/src/main.obj	a0158670e1b3ab08

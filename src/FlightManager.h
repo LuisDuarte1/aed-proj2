@@ -25,6 +25,8 @@ struct AirportNode{
 
     std::list<Flight> flights;
 
+    std::shared_ptr<AirportNode> parent;
+
     bool visited;
 
     bool operator==(const AirportNode& node) const;
@@ -55,7 +57,9 @@ class FlightManager{
 
         bool addFlight(std::string src_code, std::string dst_code, std::shared_ptr<Airline>);
 
+        std::list<Flight> cityFlights(std::string src,std::string dest);
 
+        int flightsfromairport(std::string code);
 
 
     private:
