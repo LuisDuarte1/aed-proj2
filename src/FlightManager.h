@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_set>
+#include <set>
 
 #include "Airline.h"
 #include "Airport.h"
@@ -28,9 +29,8 @@ struct AirportNode{
     std::shared_ptr<AirportNode> parent;
 
     bool visited;
-    
-    std::shared_ptr<AirportNode> prev;
 
+    int dist;
 
     bool operator==(const AirportNode& node) const;
 };
@@ -62,8 +62,11 @@ class FlightManager{
 
         std::list<Flight> cityFlights(std::string src,std::string dest);
 
-        int flightsfromairport(std::string code);
+        std::list<std::string> airportinformation(std::string code);
 
+        std::set<std::string> airportinformationairlines(std::string code);
+
+        std::set<std::string> airportinformationcountries(std::string code);
 
     private:
 

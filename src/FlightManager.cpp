@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <queue>
+#include <set>
 
 FlightManager* FlightManager::instance = nullptr;
 
@@ -130,7 +131,8 @@ void FlightManager::resetVisitedAirports(){
     static const std::shared_ptr<AirportNode> null =std::shared_ptr<AirportNode>(nullptr); 
     for(auto it = airports.begin(); it != airports.end(); it++){
         (*it)->visited = false;
-        (*it)->prev = null;
+        (*it)->parent = null;
+        (*it)->dist=-1;
     }
 }
 
@@ -165,7 +167,85 @@ std::shared_ptr<Airline> FlightManager::getAirline(std::string code){
     return *airlines.find(std::make_shared<Airline>(Airline(code)));
 }
 
+/*
+std::list<Flight> FlightManager::cityFlights(std::string src,std::string dest){
+    std::list<Flight> res;
+    this->resetVisitedAirports();
+    std::queue<std::shared_ptr<AirportNode>> q;
+
+    for(auto ita = airports.begin(); ita != airports.end(); ita++){
+        if((*ita)->airport.getCity()!=src) continue;
+        if((*ita)->visited == false){
+            (*ita)->visited=true;
+            (*ita)->dist=0;
+            q.push(*ita);
+        }
+    }
+
+    while(!q.empty()){
+        std::shared_ptr<AirportNode> v = q.front();
+        q.pop();
+        for(auto it = (*airports.find(v))->flights.begin();it != (*airports.find(v))->flights.end();it++){
+            if(!(*it).destination_node->visited){
+                (*it).destination_node->visited=true;
+                (*it).destination_node->dist=v->dist+1;
+
+            }
+        }
+    }
 
 
+    return res;
+}
+ */
 
+std::list<std::string> FlightManager::airportinformation(std::string code){
+    std::set<std::string> airlines;
+    std::set<std::string> countries;
+    std::list<std::string> res;
+    std::shared_ptr<AirportNode> airport = *airports.find(std::make_shared<AirportNode>(Airport(code)));
 
+    for(auto it=airport->flights.begin();it!=airport->flights.end();it++){
+        for(int i = 0;i<it->flights.size();i++){
+            airlines.insert((*it).flights[i]->getCode());
+        }
+    }
+
+    for(auto it=airport->flights.begin();it!=airport->flights.end();it++){
+        countries.insert((*it).destination_node->airport.getCountry());
+    }
+
+    res.push_back("Code: "+airport->airport.getCode());
+    res.push_back("Name: "+airport->airport.getName());
+    res.push_back("City: "+airport->airport.getCity()+", "+airport->airport.getCountry());
+    res.push_back("Location: "+std::to_string(airport->airport.getCoordinates().first)+" ; "+std::to_string(airport->airport.getCoordinates().second));
+    res.push_back("Number of flights from the airport: " + std::to_string(airport->flights.size()));
+    res.push_back("Number of airlines: "+std::to_string(airlines.size()));
+    res.push_back("Number of countries: "+std::to_string(countries.size()));
+
+    return res;
+}
+
+std::set<std::string> FlightManager::airportinformationairlines(std::string code){
+    std::set<std::string> airlines;
+    std::shared_ptr<AirportNode> airport = *airports.find(std::make_shared<AirportNode>(Airport(code)));
+
+    for(auto it=airport->flights.begin();it!=airport->flights.end();it++){
+        for(int i = 0;i<it->flights.size();i++){
+            airlines.insert((*it).flights[i]->getCode());
+        }
+    }
+
+    return airlines;
+}
+
+std::set<std::string> FlightManager::airportinformationcountries(std::string code){
+    std::set<std::string> countries;
+    std::shared_ptr<AirportNode> airport = *airports.find(std::make_shared<AirportNode>(Airport(code)));
+
+    for(auto it=airport->flights.begin();it!=airport->flights.end();it++){
+        countries.insert((*it).destination_node->airport.getCountry());
+    }
+
+    return countries;
+}
