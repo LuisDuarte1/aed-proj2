@@ -23,6 +23,10 @@ bool FlightManager::AirlineEquals::operator()(const std::shared_ptr<Airline>& ai
 AirportNode::AirportNode(Airport airport) : airport(airport){
     visited = false;
 }
+Flight::Flight(std::shared_ptr<AirportNode> destination_node, std::vector<std::shared_ptr<Airline>> flights) {
+    this->flights = flights;
+    this->destination_node = destination_node;
+}
 
 bool AirportNode::operator==(const AirportNode& node) const{
     return airport == node.airport;
@@ -162,4 +166,10 @@ std::shared_ptr<AirportNode> FlightManager::getAirportNode(std::string code){
 
 std::shared_ptr<Airline> FlightManager::getAirline(std::string code){
     return *airlines.find(std::make_shared<Airline>(Airline(code)));
+}
+void FlightManager::resetdistanceAirports() {
+    static const std::shared_ptr<AirportNode> null = std::shared_ptr<AirportNode>(nullptr);
+    for (auto it = airports.begin(); it != airports.end(); it++) {
+        (*it)->dist = -1;
+    }
 }

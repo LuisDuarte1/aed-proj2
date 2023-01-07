@@ -27,4 +27,4 @@ endif(DOXYGEN_FOUND)
 #Proj build
 file(GLOB CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h)
 
-add_executable(proj1_aed ${CPP_SOURCES} )
+add_executable(proj1_aed ${CPP_SOURCES} src/DistanceAirportFinder.cpp src/LookForAirport.h src/LookForAirport.cpp)
