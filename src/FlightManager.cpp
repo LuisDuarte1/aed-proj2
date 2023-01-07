@@ -1,4 +1,5 @@
 #include "FlightManager.h"
+#include "LookForAirport.h"
 #include <fstream>
 #include <sstream>
 #include <queue>
@@ -24,6 +25,10 @@ bool FlightManager::AirlineEquals::operator()(const std::shared_ptr<Airline>& ai
 
 AirportNode::AirportNode(Airport airport) : airport(airport){
     visited = false;
+}
+Flight::Flight(std::shared_ptr<AirportNode> destination_node, std::vector<std::shared_ptr<Airline>> flights) {
+    this->flights = flights;
+    this->destination_node = destination_node;
 }
 
 bool AirportNode::operator==(const AirportNode& node) const{
@@ -167,38 +172,6 @@ std::shared_ptr<Airline> FlightManager::getAirline(std::string code){
     return *airlines.find(std::make_shared<Airline>(Airline(code)));
 }
 
-/*
-std::list<Flight> FlightManager::cityFlights(std::string src,std::string dest){
-    std::list<Flight> res;
-    this->resetVisitedAirports();
-    std::queue<std::shared_ptr<AirportNode>> q;
-
-    for(auto ita = airports.begin(); ita != airports.end(); ita++){
-        if((*ita)->airport.getCity()!=src) continue;
-        if((*ita)->visited == false){
-            (*ita)->visited=true;
-            (*ita)->dist=0;
-            q.push(*ita);
-        }
-    }
-
-    while(!q.empty()){
-        std::shared_ptr<AirportNode> v = q.front();
-        q.pop();
-        for(auto it = (*airports.find(v))->flights.begin();it != (*airports.find(v))->flights.end();it++){
-            if(!(*it).destination_node->visited){
-                (*it).destination_node->visited=true;
-                (*it).destination_node->dist=v->dist+1;
-
-            }
-        }
-    }
-
-
-    return res;
-}
- */
-
 std::list<std::string> FlightManager::airportinformation(std::string code){
     std::set<std::string> airlines;
     std::set<std::string> countries;
@@ -249,3 +222,59 @@ std::set<std::string> FlightManager::airportinformationcountries(std::string cod
 
     return countries;
 }
+
+
+std::list<std::string> FlightManager::airportinformationreachable(std::string code, int n){
+    std::list<std::string> res;
+    std::set<std::string> countries;
+    std::set<std::string> cities;
+    int nairports=0;
+
+    LookForAirport::bfs(code,this->getAirlines());
+    for(auto it = airports.begin();it!=airports.end();it++){
+        nairports++;
+        countries.insert((*it)->airport.getCountry());
+        cities.insert((*it)->airport.getCity());
+    }
+
+    res.push_back("Using "+std::to_string(n)+" flights, we can reach:");
+    res.push_back(std::to_string(nairports)+" airports");
+    res.push_back(std::to_string(cities.size())+" cities");
+    res.push_back(std::to_string(countries.size())+" countries");
+
+    return res;
+}
+
+
+
+
+std::vector<std::shared_ptr<AirportNode>> FlightManager::cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines){
+    std::vector<std::shared_ptr<AirportNode>> res;
+    std::vector<std::shared_ptr<AirportNode>> best;
+    std::vector<std::shared_ptr<AirportNode>> atual;
+    std::vector<std::string> srcairports;
+    std::vector<std::string> destairports;
+
+    for(auto ita = airports.begin(); ita != airports.end(); ita++){
+        if((*ita)->airport.getCity()==src) srcairports.push_back((*ita)->airport.getCode());
+        else if((*ita)->airport.getCity()==dest) destairports.push_back((*ita)->airport.getCode());
+        }
+
+    for(int s = 0;s<srcairports.size();s++){
+        int mindest = INT_MAX;
+        for(int d = 0; d<destairports.size();d++){
+            atual=LookForAirport::searchByAirport(srcairports[s],destairports[d],possibleairlines);
+            if(atual.size()<=mindest){
+                best = atual;
+                mindest= atual.size();
+            }
+        }
+        res.insert(res.end(),best.begin(),best.end());
+    }
+
+    return res;
+}
+
+
+
+

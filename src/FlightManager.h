@@ -13,6 +13,8 @@
 struct AirportNode;
 
 struct Flight{
+    Flight(std::shared_ptr<AirportNode> destination_node,std::vector<std::shared_ptr<Airline>> flights);
+
     std::shared_ptr<AirportNode> destination_node;
     
     std::vector<std::shared_ptr<Airline>> flights;
@@ -30,7 +32,8 @@ struct AirportNode{
 
     bool visited;
 
-    int dist;
+    int dist; //distance to destination node
+
 
     bool operator==(const AirportNode& node) const;
 };
@@ -56,17 +59,25 @@ class FlightManager{
 
         std::shared_ptr<Airline> getAirline(std::string code);
 
+        std::vector<std::shared_ptr<Airline>> getAirlines();
+
         void resetVisitedAirports();
+
+        void resetdistanceAirports();
 
         bool addFlight(std::string src_code, std::string dst_code, std::shared_ptr<Airline>);
 
-        std::list<Flight> cityFlights(std::string src,std::string dest);
+        std::vector<std::shared_ptr<AirportNode>> cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines);
 
         std::list<std::string> airportinformation(std::string code);
+
+        std::list<std::string> airportinformationreachable(std::string code, int n);
 
         std::set<std::string> airportinformationairlines(std::string code);
 
         std::set<std::string> airportinformationcountries(std::string code);
+
+
 
     private:
 

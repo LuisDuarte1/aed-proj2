@@ -45,7 +45,7 @@ std::vector<std::shared_ptr<AirportNode>> DistanceAirportFinder::bfsDistance(std
             double dist = haversine(coords,flight.destination_node->airport.getCoordinates());
             //the distance should reduce to better optimize this, otherwise it will probably get stuck checking all coordinates
             if(dist > maxDist || (!checkIfFlightHasAirline(flight.flights, airlines) && airlines.size() != 0)) continue;
-            flight.destination_node->prev = i;
+            flight.destination_node->parent = i;
             flight.destination_node->visited = true;
             queue.push(flight.destination_node);
             if(dist <= radius){
@@ -63,7 +63,7 @@ std::stack<std::shared_ptr<AirportNode>> tracebackPath(std::shared_ptr<AirportNo
     std::shared_ptr<AirportNode> i = destination;
     while(i.get() != nullptr){
         path.push(i);
-        i = i->prev;
+        i = i->parent;
     }
     return path;
 }
