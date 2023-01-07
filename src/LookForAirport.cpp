@@ -2,8 +2,15 @@
 #include <algorithm>
 #include "LookForAirport.h"
 #include "FlightManager.h"
-std::vector<std::shared_ptr<Airline>> intersectAirlines(std::vector<std::shared_ptr<Airline>>& flights, std::vector<std::shared_ptr<Airline>>& airlines){
-    std::vector<std::shared_ptr<Airline>> intersection;
+namespace LookForAirport{  std::vector<std::list<Flight>> AirlinesDid;}
+
+void LookForAirport::addAirlinesDid(std::list<Flight> a) {
+    AirlinesDid.push_back(a);
+}
+std::vector<std::list<Flight>> LookForAirport::getAirlinesDid() {
+    return LookForAirport::AirlinesDid;
+}
+std::vector<std::shared_ptr<Airline>> intersecterAirlines(std::vector<std::shared_ptr<Airline>>& flights, std::vector<std::shared_ptr<Airline>>& airlines){
     if(airlines.size()==0){
         return flights;
     }
@@ -31,7 +38,7 @@ void bfs(std::string AirportDep,std::vector<std::shared_ptr<Airline>> airlines){
         for(auto e:u->flights){
             std::shared_ptr<AirportNode> w = e.destination_node;
             std::vector<std::shared_ptr<Airline>> intersect;
-            intersect = intersectAirlines(e.flights,airlines);
+            intersect = intersecterAirlines(e.flights,airlines);
             if(!w->visited&&(intersect.size()!=0||airlines.size()==0)){
                 queue.push(w);
                 w->visited = true;
@@ -41,7 +48,7 @@ void bfs(std::string AirportDep,std::vector<std::shared_ptr<Airline>> airlines){
         }
     }
 }
-void printFlights(std::list<Flight> flights,std::shared_ptr<AirportNode> airportdeparture)
+void printFlightstoOneRoute(std::list<Flight> flights,std::shared_ptr<AirportNode> airportdeparture)
 {
     std::cout<<airportdeparture->airport.getName()<<"\n";
     for(auto it = flights.begin();it != flights.end();it++){
@@ -50,20 +57,41 @@ void printFlights(std::list<Flight> flights,std::shared_ptr<AirportNode> airport
         auto l = *f;
         std::cout<<"    |\n    | Airline: "<< l->getCode()<<"\n    |\n"<<it->destination_node->airport.getName()<<"\n";
     }
+    std::cout<<"\n";
+}
+void LookForAirport::printFlightstoMoreThanOneRoute(std::shared_ptr<AirportNode> airportdeparture)
+{
+    std::vector<std::list<Flight>> AirlinesDid = LookForAirport::getAirlinesDid();
+    for(auto it=AirlinesDid.begin();it!=AirlinesDid.end();it++) {
+       if (it != AirlinesDid.begin()) {
+            std::cout << airportdeparture->airport.getName() << "\n";
+            for (auto i = it->begin(); i != it->end(); i++) {
+                auto airline = i->flights;
+                auto f = airline.begin();
+                auto l = *f;
+                std::cout << "    |\n    | Airline: " << l->getCode() << "\n    |\n"
+                          << i->destination_node->airport.getName() << "\n";
+            }
+            std::cout<<"\n";
+       }
+    }
+    std::cout<<"\n";
 
 }
-std::vector<std::shared_ptr<AirportNode>> LookForAirport::searchByAirport(std::string airportcodedeparture,std::string airportcodearrival,
-                                                                          std::vector<std::shared_ptr<Airline>> possibleairlines) {
+//AFINAL VALE MAIS A PENA SER VECTOR SHARED PTR.
+//CRIAR PARA CASO NAO HAJA VOOS OU POSSIBILIDADE
+std::list<Flight> LookForAirport::searchByAirport(std::string airportcodedeparture,std::string airportcodearrival, std::vector<std::shared_ptr<Airline>> possibleairlines) {
     FlightManager *flightManager = FlightManager::getInstance();
     flightManager->resetVisitedAirports();
+    flightManager->resetdistanceAirports();
     std::shared_ptr<AirportNode> airportarrival = flightManager->getAirportNode(airportcodearrival);
     std::shared_ptr<AirportNode> airportdeparture = flightManager->getAirportNode(airportcodedeparture);
     if (airportarrival.get() == nullptr){
-        std::vector<std::shared_ptr<AirportNode>> a;
+        std::list<Flight> a;
         return a;
     }
     if (airportdeparture.get() == nullptr){
-        std::vector<std::shared_ptr<AirportNode>> a;
+        std::list<Flight> a;
         return a;
     }
     bfs(airportcodedeparture, possibleairlines);
@@ -84,7 +112,7 @@ std::vector<std::shared_ptr<AirportNode>> LookForAirport::searchByAirport(std::s
                         path.push_back(minipath);
                     } else {
                         std::vector<std::shared_ptr<Airline>> intersect;
-                        intersect = intersectAirlines(it->flights, possibleairlines);
+                        intersect = intersecterAirlines(it->flights, possibleairlines);
                         auto randomcompany = intersect.begin();
                         std::vector<std::shared_ptr<Airline>> onlyoneairline;
                         onlyoneairline.push_back(*randomcompany);
@@ -95,7 +123,113 @@ std::vector<std::shared_ptr<AirportNode>> LookForAirport::searchByAirport(std::s
                 }
             }
         }
+        std::reverse(path.begin(),path.end());
+        printFlightstoOneRoute(path, airportdeparture);
     }
-    printFlights(path, airportdeparture);
+    else{
+        std::cout<<"Not available\n";
+    }
+    return path;
+}
+void LookForAirport::dfsToAllPaths(std::string airportcodedeparture,std::string airportcodearrival, std::vector<std::shared_ptr<Airline>> possibleairlines,int limit,int counter) {
+    FlightManager *flightManager = FlightManager::getInstance();
+    std::shared_ptr<AirportNode> airportarrival = flightManager->getAirportNode(airportcodearrival);
+    std::shared_ptr<AirportNode> airportdeparture = flightManager->getAirportNode(airportcodedeparture);
+    airportdeparture->visited = true;
+    //std::cout<<airportdeparture->airport.getCode()<<"\n";
+    if (airportarrival == airportdeparture) {
+        //std::cout<<"GOT HERE!\n";
+        std::list<Flight> path;
+        if (airportarrival->visited) {
+            std::shared_ptr<AirportNode> airportcurrent = airportarrival;
+            int counterr = 0;
+            while (counterr < limit) {
+                std::shared_ptr<AirportNode> airportafter = airportcurrent;
+                counterr++;
+                airportcurrent = airportcurrent->prev;
+                std::list<Flight> voos = airportcurrent->flights;
+                for (auto it = voos.begin(); it != voos.end(); it++) {
+                    if (it->destination_node == airportafter) {
+                        if (possibleairlines.size() == 0) {
+                            auto randomcompany = it->flights.begin();
+                            std::vector<std::shared_ptr<Airline>> onlyoneairline;
+                            onlyoneairline.push_back(*randomcompany);
+                            Flight minipath = Flight(airportafter, onlyoneairline);
+                            path.push_back(minipath);
+                        } else {
+                            std::vector<std::shared_ptr<Airline>> intersect;
+                            intersect = intersecterAirlines(it->flights, possibleairlines);
+                            auto randomcompany = intersect.begin();
+                            std::vector<std::shared_ptr<Airline>> onlyoneairline;
+                            onlyoneairline.push_back(*randomcompany);
+                            Flight minipath = Flight(airportafter, onlyoneairline);
+                            path.push_back(minipath);
+                        }
+                        break;
+                    }
+                }
+            }
+            std::reverse(path.begin(), path.end());
+            int verifyout = 0;
+            for (auto i = AirlinesDid.begin(); i != AirlinesDid.end(); i++) {
+                int verify = 0;
+                auto it = path.begin();
+                for (auto ite = i->begin(); ite != i->end(); ite++) {
+                    if (it->destination_node != ite->destination_node) {
+                        it++;
+                    } else {
+                        verify++;
+                        it++;
+                    }
+                }
+                if (verify == limit) {
+                    verifyout++;
+                }
+            }
+            if(verifyout==0){LookForAirport::addAirlinesDid(path); }
+            }
+            else{
+                std::cout << "Not available\n";
+            }
+
+        } else if (counter == limit) {
+            //std::cout<<"Not got here!\n";
+            return;
+        } else {
+            counter++;
+            for (auto it = airportdeparture->flights.begin(); it != airportdeparture->flights.end(); it++) {
+                if (!it->destination_node->visited) {
+                    it->destination_node->prev = airportdeparture;
+                    //std::cout<<it->destination_node->airport.getCode()<<"\n";
+                    dfsToAllPaths(it->destination_node->airport.getCode(), airportcodearrival, possibleairlines, limit,
+                                  counter);
+                }
+            }
+        }
+}
+void LookForAirport::searchByMoreRoutes(std::string airportcodedeparture,std::string airportcodearrival, std::vector<std::shared_ptr<Airline>> possibleairlines){
+
+    std::list<Flight> firstroute = searchByAirport(airportcodedeparture,airportcodearrival,possibleairlines);
+    if(firstroute.size()==0){
+        std::cout<<"Not possible at all to give a single route\n";
+        return;
+    }
+    FlightManager *flightManager = FlightManager::getInstance();
+    flightManager->resetVisitedAirports();
+    flightManager->resetdistanceAirports();
+    std::shared_ptr<AirportNode> airportarrival = flightManager->getAirportNode(airportcodearrival);
+    std::shared_ptr<AirportNode> airportdeparture = flightManager->getAirportNode(airportcodedeparture);
+    if (airportarrival.get() == nullptr){
+        return;
+    }
+    if (airportdeparture.get() == nullptr){
+        return;
+    }
+    int size = firstroute.size();
+    int count = 0;
+    AirlinesDid.clear();
+    AirlinesDid.push_back(firstroute);
+    dfsToAllPaths(airportcodedeparture,airportcodearrival,possibleairlines,size,count);
+    LookForAirport::printFlightstoMoreThanOneRoute(airportdeparture);
 }
 
