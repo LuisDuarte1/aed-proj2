@@ -6,7 +6,6 @@ int main(){
     FlightManager * flightManager = FlightManager::getInstance();
     flightManager->loadFiles();
 
-    //DistanceAirportFinder::display();
     flightManager->displayairportinformation();
 
 }

@@ -1,9 +1,12 @@
 #include "FlightManager.h"
 #include "LookForAirport.h"
+#include "DistanceAirportFinder.h"
 #include <fstream>
 #include <sstream>
 #include <queue>
 #include <set>
+#include <climits>
+#include <algorithm>
 
 FlightManager* FlightManager::instance = nullptr;
 
@@ -297,16 +300,15 @@ void FlightManager::displayairportinformation() {
     int n;
     std::cout << "To see what can be reached with n flights from the airport type the number of you wish, else, type 'exit' ";
 
-
-    std::cin >> sn;
-    if (!std::isdigit(sn[0])) {
-        n = std::stoi(sn);
+    
+    if (!(std::cin >> n).good()){
         std::cout << "Invalid number... \n";
+        return;
     }
 
     res = airportinformationreachable(airportCode,n);
 
-    std::cout<<"Using "+sn+" "" flights, you can reach:\n";
+    std::cout<<"Using "<< n <<" flights, you can reach:\n";
     res[0]+" airports\n";
     res[1]+" cities\n";
     res[2]+" countries\n";
@@ -314,9 +316,18 @@ void FlightManager::displayairportinformation() {
 }
 
 
-std::vector<std::shared_ptr<AirportNode>> FlightManager::cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines){
-    std::vector<std::shared_ptr<AirportNode>> res;
-    std::vector<std::shared_ptr<AirportNode>> best;
+std::stack<std::shared_ptr<AirportNode>> tracebackPathA(std::shared_ptr<AirportNode> destination){
+    std::stack<std::shared_ptr<AirportNode>> path;
+    std::shared_ptr<AirportNode> i = destination;
+    while(i.get() != nullptr){
+        path.push(i);
+        i = i->prev;
+    }
+    return path;
+}
+
+std::vector<std::stack<std::shared_ptr<AirportNode>>> FlightManager::cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines){
+    std::vector<std::stack<std::shared_ptr<AirportNode>>> best;
 
     std::vector<std::string> srcairports;
     std::vector<std::string> destairports;
@@ -332,20 +343,51 @@ std::vector<std::shared_ptr<AirportNode>> FlightManager::cityFlights(std::string
         LookForAirport::bfs(srcairports[s],possibleairlines);
         for(int d = 0; d<destairports.size();d++){
             airport= *airports.find(std::make_shared<AirportNode>(Airport(destairports[d])));
-            if(airport->dist<dist){
+            if(airport->dist<dist && airport->dist != -1){
                 best.clear();
                 dist = airport->dist;
-                best.push_back(airport);
+                best.push_back(tracebackPathA(airport));
             }
             else if(airport->dist==dist){
-                best.push_back(airport);
+                best.push_back(tracebackPathA(airport));
             }
         }
-        res.insert(res.end(),best.begin(),best.end());
     }
 
-    return res;
+    return best;
 }
+
+
+std::vector<std::shared_ptr<Airline>> intersectAirlinesA(std::vector<std::shared_ptr<Airline>>& flights, std::vector<std::shared_ptr<Airline>>& airlines){
+    std::vector<std::shared_ptr<Airline>> intersection;
+    std::set_intersection(flights.begin(), flights.end(),
+        airlines.begin(), airlines.end(), std::back_inserter(intersection));
+    return intersection;
+}
+
+std::vector<std::shared_ptr<Airline>> getPossibleAirlinesA(std::shared_ptr<AirportNode>& src, 
+    std::shared_ptr<AirportNode>& dst, std::vector<std::shared_ptr<Airline>>& possibleAirlines){
+    
+    for(Flight& flight : src->flights){
+        if((*flight.destination_node) == (*dst)){
+            if(possibleAirlines.size() == 0) return flight.flights;
+            return intersectAirlinesA(flight.flights, possibleAirlines);
+        }
+    }
+    return {};
+}
+
+std::string toStringPossibleAirlinesA(std::vector<std::shared_ptr<Airline>> airlines){
+    std::string r = "Airlines: ";
+    if(airlines.size() == 0) return "Error: no possible airlines?";
+    for(auto it = airlines.begin(); it != --airlines.end(); it++){
+        r += (*it)->getCode();
+        r += " , ";
+    }
+    r += airlines[airlines.size()-1]->getCode();
+    return r;
+}
+
 
 void FlightManager::displaycityflight(){
     std::string srcCity;
@@ -353,12 +395,53 @@ void FlightManager::displaycityflight(){
     std::cout << "Input the departure city: ";
     std::cin >> srcCity;
     std::cout << "Input the arrival city: ";
-    std::cin >> srcCity;
+    std::cin >> destCity;
 
     std::string airlines_restriction;
     std::cout << "Input the airlines that you want to travel (write 'none' for no restriction, seperator ,): ";
     std::cin >> airlines_restriction;
 
-    //cityFlights()
+    std::vector<std::stack<std::shared_ptr<AirportNode>>> result;
+
+    std::vector<std::shared_ptr<Airline>> airlines;
+
+    if(airlines_restriction == "none"){
+        result = cityFlights(srcCity,destCity,{});
+    } else {
+        airlines_restriction.erase(std::remove(airlines_restriction.begin(), airlines_restriction.end(), ' ')
+            , airlines_restriction.end());
+        std::stringstream airlineStream(airlines_restriction);
+        std::string buf;
+        FlightManager * flightManager = FlightManager::getInstance();
+        while(std::getline(airlineStream,buf, ',').good()){
+            std::shared_ptr<Airline> i = flightManager->getAirline(buf);
+            if(i.get() == nullptr){
+                std::cout << buf << "is not a valid airline... try again.\n";
+                return displaycityflight();
+            }
+            airlines.push_back(i);
+        }
+        std::shared_ptr<Airline> i = flightManager->getAirline(buf);
+        if(i.get() == nullptr){
+            std::cout << buf << "is not a valid airline... try again.\n";
+            return displaycityflight();
+        }
+        airlines.push_back(i);
+        result = cityFlights(srcCity,destCity,airlines);
+    }
+    for(auto& path: result){
+        std::shared_ptr<AirportNode> last;
+        while(path.size() != 1){
+            std::shared_ptr<AirportNode> i = path.top();
+            path.pop();
+            std::cout << "\t"<<i->airport.getCode() << "\n\t" << i->airport.getName() << "\n";
+            std::cout << "\t|\n\t| " << toStringPossibleAirlinesA(getPossibleAirlinesA(i, path.top(), airlines)) <<"\n\t|\n\t|\n";
+            last = i;
+        }
+        std::shared_ptr<AirportNode> i = path.top();
+        std::cout << "\t" <<i->airport.getCode() << "\n\t" << i->airport.getName() << "\n";
+        std::cout << "\n\n\n--------------------\n\n\n";
+    }
+
 }
 
