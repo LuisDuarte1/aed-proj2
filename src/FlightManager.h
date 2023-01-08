@@ -41,7 +41,6 @@ struct AirportNode{
     
     std::shared_ptr<AirportNode> prev;
 
-    int dist; //distance to destination node
 
 
     /**

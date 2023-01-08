@@ -2,6 +2,7 @@
 #include "menu.h"
 #include "DistanceAirportFinder.h"
 #include "LookForAirport.h"
+#include "Statistics.h"
 
 void menu::inicio() {
     std::cout << "Welcome to the Flight Search System!\n"
@@ -28,7 +29,7 @@ void menu::inicio() {
 void menu::SearchRoute(){
     std::cout << "Please specify the terms of search:\n"
                  "1-Specific Airport\n"
-                 "2-Country\n"
+                 "2-City\n"
                  "3-Coordinates\n\n";
     int ans;
     std::cin >> ans;
