@@ -1,5 +1,6 @@
 #include <queue>
 #include <algorithm>
+#include <sstream>
 #include "LookForAirport.h"
 #include "FlightManager.h"
 namespace LookForAirport{  std::vector<std::list<Flight>> AirlinesDid;}
@@ -10,6 +11,14 @@ void LookForAirport::addAirlinesDid(std::list<Flight> a) {
 std::vector<std::list<Flight>> LookForAirport::getAirlinesDid() {
     return LookForAirport::AirlinesDid;
 }
+/**
+ * @brief:Function that returns the airlines allowed by the user in comparison to the airlines that fly between two airports.
+ * Complexity:O(1)
+ *
+ * @param flights std::vector<std::shared_ptr<Airline>>& flights
+ * @param airlines std::vector<std::shared_ptr<Airline>>& airlines
+ * @return std::vector<std::shared_ptr<Airline>>
+ */
 std::vector<std::shared_ptr<Airline>> intersecterAirlines(std::vector<std::shared_ptr<Airline>>& flights, std::vector<std::shared_ptr<Airline>>& airlines){
     if(airlines.size()==0){
         return flights;
@@ -21,7 +30,12 @@ std::vector<std::shared_ptr<Airline>> intersecterAirlines(std::vector<std::share
         return intersection;
     }
 }
-
+/**
+ * @brief:Function that searches by bfs through the Airport Graph and sets the distance and the previous node to every node
+ * Complexity:O(V+E)
+ * @param AirportDep
+ * @param airlines
+ */
 void bfs(std::string AirportDep,std::vector<std::shared_ptr<Airline>> airlines){
     FlightManager * flightManager = FlightManager::getInstance();
     flightManager->resetVisitedAirports();
@@ -48,6 +62,13 @@ void bfs(std::string AirportDep,std::vector<std::shared_ptr<Airline>> airlines){
         }
     }
 }
+/**
+ * @brief:Function that given a airport of departure and a list<Flight>, gives output of the route.
+ * Complexity:O(n)
+ *
+ * @param flights std::list<Flight> flights
+ * @param airportdeparture std::shared_ptr<AirportNode> airportdeparture
+ */
 void printFlightstoOneRoute(std::list<Flight> flights,std::shared_ptr<AirportNode> airportdeparture)
 {
     std::cout<<airportdeparture->airport.getName()<<"\n";
@@ -62,6 +83,9 @@ void printFlightstoOneRoute(std::list<Flight> flights,std::shared_ptr<AirportNod
 void LookForAirport::printFlightstoMoreThanOneRoute(std::shared_ptr<AirportNode> airportdeparture)
 {
     std::vector<std::list<Flight>> AirlinesDid = LookForAirport::getAirlinesDid();
+    if(AirlinesDid.size()==1){
+        std::cout<<"\nSorry... Any more possible routes were found.\n";
+    }
     for(auto it=AirlinesDid.begin();it!=AirlinesDid.end();it++) {
        if (it != AirlinesDid.begin()) {
             std::cout << airportdeparture->airport.getName() << "\n";
@@ -78,8 +102,6 @@ void LookForAirport::printFlightstoMoreThanOneRoute(std::shared_ptr<AirportNode>
     std::cout<<"\n";
 
 }
-//AFINAL VALE MAIS A PENA SER VECTOR SHARED PTR.
-//CRIAR PARA CASO NAO HAJA VOOS OU POSSIBILIDADE
 std::list<Flight> LookForAirport::searchByAirport(std::string airportcodedeparture,std::string airportcodearrival, std::vector<std::shared_ptr<Airline>> possibleairlines) {
     FlightManager *flightManager = FlightManager::getInstance();
     flightManager->resetVisitedAirports();
@@ -124,7 +146,6 @@ std::list<Flight> LookForAirport::searchByAirport(std::string airportcodedepartu
             }
         }
         std::reverse(path.begin(),path.end());
-        printFlightstoOneRoute(path, airportdeparture);
     }
     else{
         std::cout<<"Not available\n";
@@ -214,22 +235,105 @@ void LookForAirport::searchByMoreRoutes(std::string airportcodedeparture,std::st
         std::cout<<"Not possible at all to give a single route\n";
         return;
     }
-    FlightManager *flightManager = FlightManager::getInstance();
-    flightManager->resetVisitedAirports();
-    flightManager->resetdistanceAirports();
-    std::shared_ptr<AirportNode> airportarrival = flightManager->getAirportNode(airportcodearrival);
-    std::shared_ptr<AirportNode> airportdeparture = flightManager->getAirportNode(airportcodedeparture);
-    if (airportarrival.get() == nullptr){
-        return;
+    else {
+
+        FlightManager *flightManager = FlightManager::getInstance();
+        flightManager->resetVisitedAirports();
+        flightManager->resetdistanceAirports();
+        std::shared_ptr<AirportNode> airportarrival = flightManager->getAirportNode(airportcodearrival);
+        std::shared_ptr<AirportNode> airportdeparture = flightManager->getAirportNode(airportcodedeparture);
+        if (airportarrival.get() == nullptr) {
+            return;
+        }
+        if (airportdeparture.get() == nullptr) {
+            return;
+        }
+        int size = firstroute.size();
+        int count = 0;
+        AirlinesDid.clear();
+        AirlinesDid.push_back(firstroute);
+        dfsToAllPaths(airportcodedeparture, airportcodearrival, possibleairlines, size, count);
+        LookForAirport::printFlightstoMoreThanOneRoute(airportdeparture);
     }
-    if (airportdeparture.get() == nullptr){
-        return;
+}
+
+void LookForAirport::display(){
+
+    std::string airportCodeDeparture;
+    std::cout << "Input the airport code of departure: ";
+    if(!(std::cin >> airportCodeDeparture).good()){
+        std::cout << "Invalid airport code... try again.\n";
+        return display();
     }
-    int size = firstroute.size();
-    int count = 0;
-    AirlinesDid.clear();
-    AirlinesDid.push_back(firstroute);
-    dfsToAllPaths(airportcodedeparture,airportcodearrival,possibleairlines,size,count);
-    LookForAirport::printFlightstoMoreThanOneRoute(airportdeparture);
+    std::string airportCodeArrival;
+    std::cout << "Input the airport code of arrival: ";
+    if(!(std::cin >> airportCodeArrival).good()){
+        std::cout << "Invalid airport code... try again.\n";
+        return display();
+    }
+    std::string airlines_restriction;
+    std::cout << "Input the airlines that you want to travel (write 'none' for no restriction, seperator ,): ";
+    std::cin >> airlines_restriction;
+
+    std::list<Flight> destAirports;
+
+    std::vector<std::shared_ptr<Airline>> airlines;
+    if(airlines_restriction == "none"){
+        std::cout <<"\n";
+        destAirports=searchByAirport(airportCodeDeparture, airportCodeArrival, airlines);
+        if(destAirports.size()==0){
+            std::cout<<"Not possible at all to give a single route\n";
+            return;
+        }
+        else {
+            FlightManager * flightManager = FlightManager::getInstance();
+            flightManager->resetVisitedAirports();
+            flightManager->resetdistanceAirports();
+            std::shared_ptr<AirportNode> airportdeparture = flightManager->getAirportNode(airportCodeDeparture);
+            printFlightstoOneRoute(destAirports,airportdeparture);
+        }
+
+    } else {
+        airlines_restriction.erase(std::remove(airlines_restriction.begin(), airlines_restriction.end(), ' ')
+                , airlines_restriction.end());
+        std::stringstream airlineStream(airlines_restriction);
+        std::string buf;
+        FlightManager * flightManager = FlightManager::getInstance();
+        while(std::getline(airlineStream,buf, ',').good()){
+            std::shared_ptr<Airline> i = flightManager->getAirline(buf);
+            if(i.get() == nullptr){
+                std::cout << buf << "is not a valid airline... try again.\n";
+                return display();
+            }
+            airlines.push_back(i);
+        }
+        std::shared_ptr<Airline> i = flightManager->getAirline(buf);
+        if(i.get() == nullptr){
+            std::cout << buf << "is not a valid airline... try again.\n";
+            return display();
+        }
+        airlines.push_back(i);
+        destAirports=searchByAirport(airportCodeDeparture, airportCodeArrival, airlines);
+        if(destAirports.size()==0){
+            std::cout<<"Not possible at all to give a single route\n";
+            return;
+        }
+        else {
+            flightManager->resetVisitedAirports();
+            flightManager->resetdistanceAirports();
+            std::shared_ptr<AirportNode> airportdeparture = flightManager->getAirportNode(airportCodeDeparture);
+            printFlightstoOneRoute(destAirports,airportdeparture);
+        }
+
+    }
+    std::cout<<"\nDo you want more options of routes (if they exist) with the same amount of flights?\n"
+               "Type 'YES' for yes and 'NO' for no\n";
+    std::string a;
+    std::cin>>a;
+    if(a=="YES"){
+        searchByMoreRoutes(airportCodeDeparture, airportCodeArrival, airlines);
+    }
+
+
 }
 
