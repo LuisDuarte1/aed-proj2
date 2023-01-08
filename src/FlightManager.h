@@ -30,6 +30,8 @@ struct AirportNode{
 
     std::shared_ptr<AirportNode> parent;
 
+    std::shared_ptr<AirportNode> prev;
+
     bool visited;
 
     int dist; //distance to destination node
@@ -78,6 +80,8 @@ class FlightManager{
         std::set<std::string> airportinformationcountries(std::string code);
 
         void displayairportinformation();
+
+        void displaycityflight();
 
 
 

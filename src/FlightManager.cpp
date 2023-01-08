@@ -133,11 +133,16 @@ void FlightManager::loadFiles(){
 
 
 void FlightManager::resetVisitedAirports(){
-    static const std::shared_ptr<AirportNode> null =std::shared_ptr<AirportNode>(nullptr); 
+    static const std::shared_ptr<AirportNode> null =std::shared_ptr<AirportNode>(nullptr);
     for(auto it = airports.begin(); it != airports.end(); it++){
         (*it)->visited = false;
-        (*it)->parent = null;
-        (*it)->dist=-1;
+        (*it)->prev = null;
+    }
+}
+void FlightManager::resetdistanceAirports() {
+    static const std::shared_ptr<AirportNode> null = std::shared_ptr<AirportNode>(nullptr);
+    for (auto it = airports.begin(); it != airports.end(); it++) {
+        (*it)->dist = -1;
     }
 }
 
@@ -229,8 +234,10 @@ std::vector<std::string> FlightManager::airportinformationreachable(std::string 
     std::set<std::string> countries;
     std::set<std::string> cities;
     int nairports=0;
+    std::vector<std::shared_ptr<Airline>> airlines;
 
-    LookForAirport::bfs(code,this->getAirlines());
+    LookForAirport::bfs(code,airlines);
+
     for(auto it = airports.begin();it!=airports.end();it++){
         if((*it)->dist<=n && (*it)->dist!=-1){
             nairports++;
@@ -243,15 +250,11 @@ std::vector<std::string> FlightManager::airportinformationreachable(std::string 
     res.push_back(std::to_string(cities.size()));
     res.push_back(std::to_string(countries.size()));
 
-
-
     return res;
 }
 
 
 void FlightManager::displayairportinformation() {
-
-
 
     std::string airportCode;
     std::cout << "Input the airport code: ";
@@ -269,30 +272,30 @@ void FlightManager::displayairportinformation() {
     std::cout <<"Number of flights from the airport: " + res[4]+"\n";
     std::cout <<"Number of airlines from the airport: "+res[5]+"\n";
     std::cout <<"Number of countries directly reachable: "+res[6]+"\n";
-    std::cout <<"To see the airlines type 'airlines', else, type 'no'";
+    std::cout <<"To see the airlines type 'airlines', else, type 'no' ";
 
     std::string airline;
     std::cin>>airline;
     if(airline=="airlines"){
         std::set<std::string> airportairlines = airportinformationairlines(airportCode);
         for(auto it = airportairlines.begin();it!=airportairlines.end();it++){
-            std::cout<<*it;
+            std::cout<<*it<<"\n";
         }
     }
 
-    std::cout <<"To see the countries directly reachable type 'countries', else, type 'no'";
+    std::cout <<"To see the countries directly reachable type 'countries', else, type 'no' ";
     std::string country;
     std::cin>>country;
     if(country=="countries"){
         std::set<std::string> airportcountries = airportinformationcountries(airportCode);
         for(auto it = airportcountries.begin();it!=airportcountries.end();it++){
-            std::cout<<*it;
+            std::cout<<*it<<"\n";
         }
     }
 
     std::string sn;
     int n;
-    std::cout << "To see what we can reach with n flight from the airport type the number you wish, else, type 'exit' ";
+    std::cout << "To see what can be reached with n flights from the airport type the number of you wish, else, type 'exit' ";
 
 
     std::cin >> sn;
@@ -303,7 +306,7 @@ void FlightManager::displayairportinformation() {
 
     res = airportinformationreachable(airportCode,n);
 
-    std::cout<<"Using "+sn+" "" flights, we can reach:\n";
+    std::cout<<"Using "+sn+" "" flights, you can reach:\n";
     res[0]+" airports\n";
     res[1]+" cities\n";
     res[2]+" countries\n";
@@ -342,5 +345,20 @@ std::vector<std::shared_ptr<AirportNode>> FlightManager::cityFlights(std::string
     }
 
     return res;
+}
+
+void FlightManager::displaycityflight(){
+    std::string srcCity;
+    std::string destCity;
+    std::cout << "Input the departure city: ";
+    std::cin >> srcCity;
+    std::cout << "Input the arrival city: ";
+    std::cin >> srcCity;
+
+    std::string airlines_restriction;
+    std::cout << "Input the airlines that you want to travel (write 'none' for no restriction, seperator ,): ";
+    std::cin >> airlines_restriction;
+
+    //cityFlights()
 }
 
