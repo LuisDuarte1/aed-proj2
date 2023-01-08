@@ -69,13 +69,15 @@ class FlightManager{
 
         std::vector<std::shared_ptr<AirportNode>> cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines);
 
-        std::list<std::string> airportinformation(std::string code);
+        std::vector<std::string> airportinformation(std::string code);
 
-        std::list<std::string> airportinformationreachable(std::string code, int n);
+        std::vector<std::string> airportinformationreachable(std::string code, int n);
 
         std::set<std::string> airportinformationairlines(std::string code);
 
         std::set<std::string> airportinformationcountries(std::string code);
+
+        void displayairportinformation();
 
 
 

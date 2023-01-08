@@ -172,10 +172,10 @@ std::shared_ptr<Airline> FlightManager::getAirline(std::string code){
     return *airlines.find(std::make_shared<Airline>(Airline(code)));
 }
 
-std::list<std::string> FlightManager::airportinformation(std::string code){
+std::vector<std::string> FlightManager::airportinformation(std::string code){
     std::set<std::string> airlines;
     std::set<std::string> countries;
-    std::list<std::string> res;
+    std::vector<std::string> res;
     std::shared_ptr<AirportNode> airport = *airports.find(std::make_shared<AirportNode>(Airport(code)));
 
     for(auto it=airport->flights.begin();it!=airport->flights.end();it++){
@@ -188,13 +188,13 @@ std::list<std::string> FlightManager::airportinformation(std::string code){
         countries.insert((*it).destination_node->airport.getCountry());
     }
 
-    res.push_back("Code: "+airport->airport.getCode());
-    res.push_back("Name: "+airport->airport.getName());
-    res.push_back("City: "+airport->airport.getCity()+", "+airport->airport.getCountry());
-    res.push_back("Location: "+std::to_string(airport->airport.getCoordinates().first)+" ; "+std::to_string(airport->airport.getCoordinates().second));
-    res.push_back("Number of flights from the airport: " + std::to_string(airport->flights.size()));
-    res.push_back("Number of airlines: "+std::to_string(airlines.size()));
-    res.push_back("Number of countries: "+std::to_string(countries.size()));
+    res.push_back(airport->airport.getCode());
+    res.push_back(airport->airport.getName());
+    res.push_back(airport->airport.getCity()+", "+airport->airport.getCountry());
+    res.push_back(std::to_string(airport->airport.getCoordinates().first)+" ; "+std::to_string(airport->airport.getCoordinates().second));
+    res.push_back(std::to_string(airport->flights.size()));
+    res.push_back(std::to_string(airlines.size()));
+    res.push_back(std::to_string(countries.size()));
 
     return res;
 }
@@ -224,49 +224,118 @@ std::set<std::string> FlightManager::airportinformationcountries(std::string cod
 }
 
 
-std::list<std::string> FlightManager::airportinformationreachable(std::string code, int n){
-    std::list<std::string> res;
+std::vector<std::string> FlightManager::airportinformationreachable(std::string code, int n){
+    std::vector<std::string> res;
     std::set<std::string> countries;
     std::set<std::string> cities;
     int nairports=0;
 
     LookForAirport::bfs(code,this->getAirlines());
     for(auto it = airports.begin();it!=airports.end();it++){
-        nairports++;
-        countries.insert((*it)->airport.getCountry());
-        cities.insert((*it)->airport.getCity());
+        if((*it)->dist<=n && (*it)->dist!=-1){
+            nairports++;
+            countries.insert((*it)->airport.getCountry());
+            cities.insert((*it)->airport.getCity());
+        }
     }
 
-    res.push_back("Using "+std::to_string(n)+" flights, we can reach:");
-    res.push_back(std::to_string(nairports)+" airports");
-    res.push_back(std::to_string(cities.size())+" cities");
-    res.push_back(std::to_string(countries.size())+" countries");
+    res.push_back(std::to_string(nairports));
+    res.push_back(std::to_string(cities.size()));
+    res.push_back(std::to_string(countries.size()));
+
+
 
     return res;
 }
 
 
+void FlightManager::displayairportinformation() {
+
+
+
+    std::string airportCode;
+    std::cout << "Input the airport code: ";
+    if (!(std::cin >> airportCode).good()) {
+        std::cout << "Invalid airport code... try again.\n";
+        return displayairportinformation();
+    }
+
+    std::vector<std::string> res = airportinformation(airportCode);
+
+    std::cout <<"Code: "+res[0]+"\n";
+    std::cout <<"Name: "+res[1]+"\n";
+    std::cout <<"City: "+res[2]+"\n";
+    std::cout <<"Location: "+res[3]+"\n";
+    std::cout <<"Number of flights from the airport: " + res[4]+"\n";
+    std::cout <<"Number of airlines from the airport: "+res[5]+"\n";
+    std::cout <<"Number of countries directly reachable: "+res[6]+"\n";
+    std::cout <<"To see the airlines type 'airlines', else, type 'no'";
+
+    std::string airline;
+    std::cin>>airline;
+    if(airline=="airlines"){
+        std::set<std::string> airportairlines = airportinformationairlines(airportCode);
+        for(auto it = airportairlines.begin();it!=airportairlines.end();it++){
+            std::cout<<*it;
+        }
+    }
+
+    std::cout <<"To see the countries directly reachable type 'countries', else, type 'no'";
+    std::string country;
+    std::cin>>country;
+    if(country=="countries"){
+        std::set<std::string> airportcountries = airportinformationcountries(airportCode);
+        for(auto it = airportcountries.begin();it!=airportcountries.end();it++){
+            std::cout<<*it;
+        }
+    }
+
+    std::string sn;
+    int n;
+    std::cout << "To see what we can reach with n flight from the airport type the number you wish, else, type 'exit' ";
+
+
+    std::cin >> sn;
+    if (!std::isdigit(sn[0])) {
+        n = std::stoi(sn);
+        std::cout << "Invalid number... \n";
+    }
+
+    res = airportinformationreachable(airportCode,n);
+
+    std::cout<<"Using "+sn+" "" flights, we can reach:\n";
+    res[0]+" airports\n";
+    res[1]+" cities\n";
+    res[2]+" countries\n";
+
+}
 
 
 std::vector<std::shared_ptr<AirportNode>> FlightManager::cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines){
     std::vector<std::shared_ptr<AirportNode>> res;
     std::vector<std::shared_ptr<AirportNode>> best;
-    std::vector<std::shared_ptr<AirportNode>> atual;
+
     std::vector<std::string> srcairports;
     std::vector<std::string> destairports;
+    int dist=INT_MAX;
+    std::shared_ptr<AirportNode> airport;
 
     for(auto ita = airports.begin(); ita != airports.end(); ita++){
         if((*ita)->airport.getCity()==src) srcairports.push_back((*ita)->airport.getCode());
         else if((*ita)->airport.getCity()==dest) destairports.push_back((*ita)->airport.getCode());
-        }
+    }
 
     for(int s = 0;s<srcairports.size();s++){
-        int mindest = INT_MAX;
+        LookForAirport::bfs(srcairports[s],possibleairlines);
         for(int d = 0; d<destairports.size();d++){
-            atual=LookForAirport::searchByAirport(srcairports[s],destairports[d],possibleairlines);
-            if(atual.size()<=mindest){
-                best = atual;
-                mindest= atual.size();
+            airport= *airports.find(std::make_shared<AirportNode>(Airport(destairports[d])));
+            if(airport->dist<dist){
+                best.clear();
+                dist = airport->dist;
+                best.push_back(airport);
+            }
+            else if(airport->dist==dist){
+                best.push_back(airport);
             }
         }
         res.insert(res.end(),best.begin(),best.end());
@@ -274,7 +343,4 @@ std::vector<std::shared_ptr<AirportNode>> FlightManager::cityFlights(std::string
 
     return res;
 }
-
-
-
 
