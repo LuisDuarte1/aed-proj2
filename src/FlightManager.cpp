@@ -236,9 +236,13 @@ std::vector<std::string> FlightManager::airportinformationreachable(std::string 
     int nairports=0;
     std::vector<std::shared_ptr<Airline>> airlines;
 
+    resetVisitedAirports();
+    resetdistanceAirports();
+
     LookForAirport::bfs(code,airlines);
 
     for(auto it = airports.begin();it!=airports.end();it++){
+        int d =(*it)->dist;
         if((*it)->dist<=n && (*it)->dist!=-1){
             nairports++;
             countries.insert((*it)->airport.getCountry());
@@ -300,16 +304,16 @@ void FlightManager::displayairportinformation() {
 
     std::cin >> sn;
     if (!std::isdigit(sn[0])) {
-        n = std::stoi(sn);
         std::cout << "Invalid number... \n";
     }
+    n = std::stoi(sn);
 
     res = airportinformationreachable(airportCode,n);
 
-    std::cout<<"Using "+sn+" "" flights, you can reach:\n";
-    res[0]+" airports\n";
-    res[1]+" cities\n";
-    res[2]+" countries\n";
+    std::cout<<"Using "+sn+" flights, you can reach:\n";
+    std::cout<<res[0]+" airports\n";
+    std::cout<<res[1]+" cities\n";
+    std::cout<<res[2]+" countries\n";
 
 }
 
