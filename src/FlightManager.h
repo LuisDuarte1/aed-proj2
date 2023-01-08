@@ -16,6 +16,8 @@ struct AirportNode;
  * 
  */
 struct Flight{
+    Flight(std::shared_ptr<AirportNode> destination_node,std::vector<std::shared_ptr<Airline>> flights);
+
     std::shared_ptr<AirportNode> destination_node;
     
     std::vector<std::shared_ptr<Airline>> flights;
@@ -38,6 +40,8 @@ struct AirportNode{
     int dist;
     
     std::shared_ptr<AirportNode> prev;
+
+
 
     /**
      * @brief equals function for airportNode
@@ -112,6 +116,11 @@ class FlightManager{
          */
         std::shared_ptr<Airline> getAirline(std::string code);
 
+
+
+
+        void resetdistanceAirports();
+
         /**
          * @brief resets visited airports
          * 
@@ -146,6 +155,8 @@ class FlightManager{
          * @return std::unordered_set<std::shared_ptr<Airline>, HashAirline, AirlineEquals> 
          */
         inline std::unordered_set<std::shared_ptr<Airline>, HashAirline, AirlineEquals> getAirlines(){return airlines;};
+
+
 
 
     private:
