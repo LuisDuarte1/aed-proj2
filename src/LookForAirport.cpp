@@ -93,7 +93,7 @@ void LookForAirport::printFlightstoMoreThanOneRoute(std::shared_ptr<AirportNode>
             }
             std::cout<<"\n";
         }
-    }
+       }
     std::cout<<"\n";
 
 }
@@ -203,25 +203,25 @@ void LookForAirport::dfsToAllPaths(std::string airportcodedeparture,std::string 
                 }
             }
             if(verifyout==0){LookForAirport::addAirlinesDid(path); }
-        }
-        else{
-            std::cout << "Not available\n";
-        }
+            }
+            else{
+                std::cout << "Not available\n";
+            }
 
-    } else if (counter == limit) {
-        //std::cout<<"Not got here!\n";
-        return;
-    } else {
-        counter++;
-        for (auto it = airportdeparture->flights.begin(); it != airportdeparture->flights.end(); it++) {
-            if (!it->destination_node->visited) {
-                it->destination_node->prev = airportdeparture;
-                //std::cout<<it->destination_node->airport.getCode()<<"\n";
-                dfsToAllPaths(it->destination_node->airport.getCode(), airportcodearrival, possibleairlines, limit,
-                              counter);
+        } else if (counter == limit) {
+            //std::cout<<"Not got here!\n";
+            return;
+        } else {
+            counter++;
+            for (auto it = airportdeparture->flights.begin(); it != airportdeparture->flights.end(); it++) {
+                if (!it->destination_node->visited) {
+                    it->destination_node->prev = airportdeparture;
+                    //std::cout<<it->destination_node->airport.getCode()<<"\n";
+                    dfsToAllPaths(it->destination_node->airport.getCode(), airportcodearrival, possibleairlines, limit,
+                                  counter);
+                }
             }
         }
-    }
 }
 void LookForAirport::searchByMoreRoutes(std::string airportcodedeparture,std::string airportcodearrival, std::vector<std::shared_ptr<Airline>> possibleairlines){
 
@@ -251,6 +251,7 @@ void LookForAirport::searchByMoreRoutes(std::string airportcodedeparture,std::st
         LookForAirport::printFlightstoMoreThanOneRoute(airportdeparture);
     }
 }
+
 
 void LookForAirport::display(){
 

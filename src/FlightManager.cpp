@@ -140,6 +140,7 @@ void FlightManager::resetVisitedAirports(){
     for(auto it = airports.begin(); it != airports.end(); it++){
         (*it)->visited = false;
         (*it)->prev = null;
+        (*it)->dist = -1;
     }
 }
 void FlightManager::resetdistanceAirports() {
