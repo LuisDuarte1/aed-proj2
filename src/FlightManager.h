@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_set>
 #include <set>
+#include <stack>
 
 #include "Airline.h"
 #include "Airport.h"
@@ -69,7 +70,7 @@ class FlightManager{
 
         bool addFlight(std::string src_code, std::string dst_code, std::shared_ptr<Airline>);
 
-        std::vector<std::shared_ptr<AirportNode>> cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines);
+        std::vector<std::stack<std::shared_ptr<AirportNode>>> cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines);
 
         std::vector<std::string> airportinformation(std::string code);
 
