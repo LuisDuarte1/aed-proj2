@@ -65,6 +65,13 @@ namespace LookForAirport{
      */
     void dfsToAllPaths(std::string airportcodedeparture,std::string airportcodearrival, std::vector<std::shared_ptr<Airline>> possibleairlines,int limit,int counter);
     /**
+    * @brief:Function that searches by bfs through the Airport Graph and sets the distance and the previous node to every node
+    * Complexity:O(V+E)
+    * @param AirportDep
+    * @param airlines
+    */
+    void bfs(std::string AirportDep,std::vector<std::shared_ptr<Airline>> airlines);
+    /**
      * @brief:Function that asks the user for the airport of departure,airport of arrival and the airlines that he wants to fly by.
      * Complexity:O(1)
      */

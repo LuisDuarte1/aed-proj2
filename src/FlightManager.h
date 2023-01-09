@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 #include <unordered_set>
+#include <set>
+#include <stack>
 
 #include "Airline.h"
 #include "Airport.h"
@@ -35,12 +37,13 @@ struct AirportNode{
 
     std::list<Flight> flights;
 
-    bool visited;
+    std::shared_ptr<AirportNode> parent;
 
-    int dist;
-    
     std::shared_ptr<AirportNode> prev;
 
+    bool visited;
+
+    int dist; //distance to destination node
 
 
     /**
@@ -77,6 +80,20 @@ class FlightManager{
     public:
 
         FlightManager(FlightManager& other) = delete;
+
+        std::vector<std::stack<std::shared_ptr<AirportNode>>> cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines);
+
+        std::vector<std::string> airportinformation(std::string code);
+
+        std::vector<std::string> airportinformationreachable(std::string code, int n);
+
+        std::set<std::string> airportinformationairlines(std::string code);
+
+        std::set<std::string> airportinformationcountries(std::string code);
+
+        void displayairportinformation();
+
+        void displaycityflight();
 
         void operator=(const FlightManager &) = delete;
 

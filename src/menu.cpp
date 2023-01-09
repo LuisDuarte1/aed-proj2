@@ -34,12 +34,13 @@ void menu::SearchRoute(){
     int ans;
     std::cin >> ans;
     std::cout << "\n";
+    FlightManager * flightManager = FlightManager::getInstance();
     switch (ans) {
         case 1:
             LookForAirport::display();
             break;
         case 2:
-            //INSERIR PROCURA POR PAIS
+            flightManager->getInstance();
             break;
         case 3:
             DistanceAirportFinder::display();

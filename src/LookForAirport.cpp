@@ -30,13 +30,8 @@ std::vector<std::shared_ptr<Airline>> intersecterAirlines(std::vector<std::share
         return intersection;
     }
 }
-/**
- * @brief:Function that searches by bfs through the Airport Graph and sets the distance and the previous node to every node
- * Complexity:O(V+E)
- * @param AirportDep
- * @param airlines
- */
-void bfs(std::string AirportDep,std::vector<std::shared_ptr<Airline>> airlines){
+
+void LookForAirport:: bfs(std::string AirportDep,std::vector<std::shared_ptr<Airline>> airlines){
     FlightManager * flightManager = FlightManager::getInstance();
     flightManager->resetVisitedAirports();
     flightManager->resetdistanceAirports();
@@ -87,7 +82,7 @@ void LookForAirport::printFlightstoMoreThanOneRoute(std::shared_ptr<AirportNode>
         std::cout<<"\nSorry... Any more possible routes were found.\n";
     }
     for(auto it=AirlinesDid.begin();it!=AirlinesDid.end();it++) {
-       if (it != AirlinesDid.begin()) {
+        if (it != AirlinesDid.begin()) {
             std::cout << airportdeparture->airport.getName() << "\n";
             for (auto i = it->begin(); i != it->end(); i++) {
                 auto airline = i->flights;
@@ -97,8 +92,8 @@ void LookForAirport::printFlightstoMoreThanOneRoute(std::shared_ptr<AirportNode>
                           << i->destination_node->airport.getName() << "\n";
             }
             std::cout<<"\n";
+        }
        }
-    }
     std::cout<<"\n";
 
 }
@@ -257,6 +252,7 @@ void LookForAirport::searchByMoreRoutes(std::string airportcodedeparture,std::st
     }
 }
 
+
 void LookForAirport::display(){
 
     std::string airportCodeDeparture;
@@ -336,4 +332,6 @@ void LookForAirport::display(){
 
 
 }
+
+
 
