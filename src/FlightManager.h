@@ -81,18 +81,63 @@ class FlightManager{
 
         FlightManager(FlightManager& other) = delete;
 
+        /**
+         * @brief Get the best flights from two cities
+         *
+         * Complexity: O(n^2)
+         *
+         * @return std::vector<std::stack<std::shared_ptr<AirportNode>>>
+         */
         std::vector<std::stack<std::shared_ptr<AirportNode>>> cityFlights(std::string src,std::string dest,std::vector<std::shared_ptr<Airline>> possibleairlines);
 
+        /**
+         * @brief Get the basic information of an airport (name, location, etc)
+         *
+         * Complexity: O(n*m), n-  number of flights from the airport, m-number of airlines doing the flight
+         *
+         * @return std::vector<std::string>
+         */
         std::vector<std::string> airportinformation(std::string code);
 
+        /**
+         * @brief Get the number of cities, aiports and countries reachable by n flights
+         *
+         * Complexity: O(n)
+         *
+         * @return std::vector<std::string>
+         */
         std::vector<std::string> airportinformationreachable(std::string code, int n);
 
+        /**
+         * @brief Get all the airlines leaving the airport
+         *
+         * Complexity: O(n*m), n-  number of flights from the airport, m-number of airlines doing the flight
+         *
+         * @return std::set<std::string>
+         */
         std::set<std::string> airportinformationairlines(std::string code);
 
+        /**
+         * @brief Get the countries directly reached by the airport
+         *
+         * Complexity: O(n)
+         *
+         * @return std::set<std::string>
+         */
         std::set<std::string> airportinformationcountries(std::string code);
 
+        /**
+         * @brief Menu for information airport Finder
+         * 
+         * Complexity: O(1)
+         */
         void displayairportinformation();
 
+        /**
+         * @brief Menu for city airport Finder
+         *
+         * Complexity: O(|R|) where R is the returning possible aiports
+         */
         void displaycityflight();
 
         void operator=(const FlightManager &) = delete;
