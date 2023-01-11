@@ -1,0 +1,15 @@
+# ninja log v5
+13	1791	6949289683322577	CMakeFiles/proj1_aed.dir/src/Airport.obj	9135474d257e4490
+1	2189	6949289687551856	CMakeFiles/proj1_aed.dir/src/Airline.obj	6c191f9deeb11bd0
+1799	3986	6949289705541793	CMakeFiles/proj1_aed.dir/src/main.obj	a0158670e1b3ab08
+71	4158	6949289707204473	CMakeFiles/proj1_aed.dir/src/DistanceAirportFinder.obj	26ed06ac1bb61d49
+2190	4226	6949289707821643	CMakeFiles/proj1_aed.dir/src/menu.obj	e4716c663119aa62
+80	4329	6949289708978295	CMakeFiles/proj1_aed.dir/src/LookForAirport.obj	c05bc44bc064670b
+34	4715	6949289712977872	CMakeFiles/proj1_aed.dir/src/Statistics.obj	d9c3c7e2fd6a7f91
+21	5292	6949289718702570	CMakeFiles/proj1_aed.dir/src/FlightManager.obj	b60f08931a45f882
+5292	6163	6949289727404794	proj1_aed.exe	65f8dd20e7bab3c0
+8	771	6949290439764289	CMakeFiles/proj1_aed.dir/src/menu.obj	e4716c663119aa62
+772	1502	6949290446989885	proj1_aed.exe	65f8dd20e7bab3c0
+9	814	6949311679806140	CMakeFiles/proj1_aed.dir/src/menu.obj	e4716c663119aa62
+3	1512	6949311686790735	CMakeFiles/proj1_aed.dir/src/Statistics.obj	d9c3c7e2fd6a7f91
+1513	2289	6949311694507556	proj1_aed.exe	65f8dd20e7bab3c0

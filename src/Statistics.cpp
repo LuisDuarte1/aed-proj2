@@ -1,4 +1,5 @@
 #include "Statistics.h"
+#include "FlightManager.h"
 #include <algorithm>
 #include <set>
 #include <unordered_map>
@@ -253,7 +254,8 @@ void Statistics::statisticsMenu(){
         "1 - Top airports\n"
         "2 - Top countries\n"
         "3 - Diameter of network\n"
-        "4 - Go back\n"
+        "4 - Statistics about an airport\n"
+        "5 - Go back\n"
         "Selection:";
 
     int selection;
@@ -273,7 +275,12 @@ void Statistics::statisticsMenu(){
         case 3:
             diameter();
             break;
-        case 4: return;
+        case 4: {
+            FlightManager * flightManager = FlightManager::getInstance();
+            flightManager->displayairportinformation();
+            break;}
+        case 5:
+            return;
     }
     return statisticsMenu();
 }

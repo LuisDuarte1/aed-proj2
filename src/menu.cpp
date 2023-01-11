@@ -40,7 +40,7 @@ void menu::SearchRoute(){
             LookForAirport::display();
             break;
         case 2:
-            flightManager->getInstance();
+            flightManager->displaycityflight();
             break;
         case 3:
             DistanceAirportFinder::display();
